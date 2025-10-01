@@ -51,8 +51,8 @@ const translations = {
         'current-language': 'English',
         
         // SEO内容
-        'meta-description': 'Sora2 - Advanced AI video generation platform that creates professional video content through simple text descriptions. AI Video Generation, Text-to-Video, Smart Creation Tools.',
-        'meta-keywords': 'AI Video Generation,Text-to-Video,Sora2,Artificial Intelligence Video,AI Creation Tools,Video Generation Platform',
+        'meta-description': 'Sora2 - AI video generation platform that creates professional videos from text descriptions. Text-to-video AI technology for creative content.',
+        'meta-keywords': 'AI Video Generation,Text-to-Video,Sora2,AI Video Creator,Video AI',
         'og-title': 'Sora2 - AI Video Generation Technology',
         'og-description': 'Advanced AI video generation platform that creates professional video content through simple text descriptions.',
         'twitter-title': 'Sora2 - AI Video Generation Technology',
