@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sora2 - AI视频生成平台</title>
+    <meta name="description" content="Sora2 - 下一代AI视频生成技术，让创意无限可能">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h2>Sora2</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#features">功能特性</a></li>
+                    <li><a href="#demo">演示</a></li>
+                    <li><a href="#contact">联系我们</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>欢迎来到 Sora2</h1>
+                <p class="hero-subtitle">革命性的AI视频生成平台</p>
+                <p class="hero-description">
+                    基于最先进的AI技术，Sora2让您能够轻松创建高质量的视频内容。
+                    从简单的文本描述到生动的视频画面，一切尽在掌握。
+                </p>
+                <div class="cta-buttons">
+                    <button class="btn-primary" onclick="scrollToSection('demo')">查看演示</button>
+                    <button class="btn-secondary" onclick="scrollToSection('contact')">开始使用</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <div class="container">
+                <h2>核心功能</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎬</div>
+                        <h3>智能视频生成</h3>
+                        <p>通过简单的文本描述，自动生成高质量的视频内容</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>快速处理</h3>
+                        <p>优化的算法确保快速生成，节省您宝贵的时间</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3>多样化风格</h3>
+                        <p>支持多种视频风格，满足不同场景需求</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="demo" class="demo">
+            <div class="container">
+                <h2>技术演示</h2>
+                <div class="demo-content">
+                    <div class="demo-text">
+                        <h3>体验AI视频生成的魅力</h3>
+                        <p>输入您的创意描述，见证AI如何将其转化为生动的视频画面</p>
+                        <div class="demo-input">
+                            <input type="text" placeholder="输入您的视频描述..." id="prompt-input">
+                            <button class="btn-primary" onclick="generateDemo()">生成演示</button>
+                        </div>
+                    </div>
+                    <div class="demo-preview">
+                        <div class="video-placeholder">
+                            <p>视频预览区域</p>
+                            <p>输入描述后点击生成查看效果</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact">
+            <div class="container">
+                <h2>立即开始使用</h2>
+                <p class="contact-subtitle">加入数千名创意工作者，体验AI视频生成的未来</p>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <input type="email" placeholder="请输入您的邮箱地址" required>
+                    </div>
+                    <button type="submit" class="btn-primary">获取访问权限</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Sora2. 保留所有权利。</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
