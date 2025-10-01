@@ -20,7 +20,17 @@
                     <li><a href="#contact" data-lang="nav-contact">Contact</a></li>
                 </ul>
                 <div class="language-switcher">
-                    <button id="language-toggle" class="btn-language" data-lang="language-switch">中文</button>
+                    <div class="language-dropdown">
+                        <button class="language-toggle">
+                            <span class="language-icon">🌐</span>
+                            <span class="language-text" data-lang="current-language">English</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="language-menu">
+                            <button class="language-option" data-lang="en">English</button>
+                            <button class="language-option" data-lang="zh">简体中文</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </nav>

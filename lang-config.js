@@ -47,7 +47,8 @@ const translations = {
         'footer-text': '© 2025 Sora2. All rights reserved.',
         
         // 语言切换
-        'language-switch': '中文'
+        'language-switch': '中文',
+        'current-language': 'English'
     },
     'zh': {
         // 导航
@@ -97,6 +98,7 @@ const translations = {
         'footer-text': '© 2025 Sora2. 保留所有权利。',
         
         // 语言切换
-        'language-switch': 'English'
+        'language-switch': 'English',
+        'current-language': '简体中文'
     }
 };

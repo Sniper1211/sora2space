@@ -16,12 +16,46 @@ function initLanguage() {
     applyLanguage(currentLanguage);
     
     // 添加语言切换事件监听
-    document.getElementById('language-toggle').addEventListener('click', toggleLanguage);
+    setupLanguageDropdown();
+}
+
+// 设置语言下拉菜单
+function setupLanguageDropdown() {
+    const dropdown = document.querySelector('.language-dropdown');
+    const toggle = document.querySelector('.language-toggle');
+    const menu = document.querySelector('.language-menu');
+    const options = document.querySelectorAll('.language-option');
+    
+    // 切换下拉菜单显示/隐藏
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('active');
+    });
+    
+    // 点击选项切换语言
+    options.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const lang = option.getAttribute('data-lang');
+            switchLanguage(lang);
+            dropdown.classList.remove('active');
+        });
+    });
+    
+    // 点击页面其他区域关闭下拉菜单
+    document.addEventListener('click', () => {
+        dropdown.classList.remove('active');
+    });
+    
+    // 阻止下拉菜单内的点击事件冒泡
+    menu.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
 }
 
 // 切换语言
-function toggleLanguage() {
-    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+function switchLanguage(lang) {
+    currentLanguage = lang;
     localStorage.setItem('sora2-language', currentLanguage);
     document.documentElement.lang = currentLanguage;
     applyLanguage(currentLanguage);
@@ -47,11 +81,22 @@ function applyLanguage(lang) {
         }
     });
     
-    // 更新语言切换按钮文本
-    const toggleBtn = document.getElementById('language-toggle');
-    if (toggleBtn && translations[lang] && translations[lang]['language-switch']) {
-        toggleBtn.textContent = translations[lang]['language-switch'];
+    // 更新当前语言显示
+    const currentLangText = document.querySelector('.language-text');
+    if (currentLangText) {
+        currentLangText.textContent = lang === 'en' ? 'English' : '简体中文';
+        currentLangText.setAttribute('data-lang', 'current-language');
     }
+    
+    // 更新选项激活状态
+    const options = document.querySelectorAll('.language-option');
+    options.forEach(option => {
+        if (option.getAttribute('data-lang') === lang) {
+            option.classList.add('active');
+        } else {
+            option.classList.remove('active');
+        }
+    });
 }
 
 // 平滑滚动到指定区域
