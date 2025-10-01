@@ -1,51 +1,34 @@
-# Sora2 Landing Page
+# Sora2Space - AI Video Generation Landing Page
 
-这是一个为Sora2 AI视频生成平台设计的响应式落地页项目。
+A responsive landing page for Sora2 AI video generation platform, designed to capture search traffic and showcase AI video generation capabilities.
 
-## 功能特性
+## Features
 
-- ✅ 响应式设计，支持移动端和桌面端
-- ✅ 平滑滚动导航
-- ✅ 交互式演示功能
-- ✅ 邮件注册表单
-- ✅ 现代化UI设计
+- **Responsive Design**: Mobile-first approach with modern UI/UX
+- **Bilingual Support**: English/Chinese language switching
+- **SEO Optimized**: Complete SEO meta tags and structured data
+- **Google Analytics**: Integrated tracking for user behavior analysis
+- **Interactive Demo**: AI video generation simulation
+- **Contact Form**: Lead capture functionality
 
-## 文件结构
+## SEO Optimization
 
-```
-sora2space/
-├── index.html          # 主页面
-├── style.css           # 样式文件
-├── script.js           # 交互脚本
-├── README.md           # 项目说明
-└── test.txt           # 原有测试文件
-```
+- Structured Data (Schema.org)
+- Open Graph and Twitter Card tags
+- XML Sitemap and robots.txt
+- Keyword-optimized content
+- Canonical URLs
+- Mobile-friendly design
 
-## 快速开始
+## Deployment
 
-1. 直接在浏览器中打开 `index.html` 文件
-2. 或者使用本地服务器运行：
-   ```bash
-   # 使用Python
-   python -m http.server 8000
-   
-   # 使用Node.js
-   npx serve .
-   ```
+The site is automatically deployed to Vercel when pushing to the main branch.
 
-## 自定义配置
+## Files Structure
 
-- 修改 `style.css` 中的颜色和样式
-- 更新 `index.html` 中的文本内容
-- 调整 `script.js` 中的交互逻辑
-
-## 浏览器支持
-
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
-
-## 许可证
-
-MIT License
+- `index.html` - Main landing page
+- `style.css` - Responsive styling
+- `script.js` - Interactive functionality
+- `lang-config.js` - Language translations
+- `sitemap.xml` - SEO sitemap
+- `robots.txt` - Search engine directives
