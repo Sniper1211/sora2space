@@ -106,6 +106,56 @@ function applyLanguage(lang) {
             option.classList.remove('active');
         }
     });
+    
+    // 更新SEO meta标签
+    updateSEOMetaTags(lang);
+}
+
+// 更新SEO meta标签
+function updateSEOMetaTags(lang) {
+    if (!translations[lang]) return;
+    
+    // 更新description meta标签
+    const descriptionMeta = document.querySelector('meta[name="description"]');
+    if (descriptionMeta && translations[lang]['meta-description']) {
+        descriptionMeta.setAttribute('content', translations[lang]['meta-description']);
+    }
+    
+    // 更新keywords meta标签
+    const keywordsMeta = document.querySelector('meta[name="keywords"]');
+    if (keywordsMeta && translations[lang]['meta-keywords']) {
+        keywordsMeta.setAttribute('content', translations[lang]['meta-keywords']);
+    }
+    
+    // 更新Open Graph meta标签
+    const ogTitleMeta = document.querySelector('meta[property="og:title"]');
+    if (ogTitleMeta && translations[lang]['og-title']) {
+        ogTitleMeta.setAttribute('content', translations[lang]['og-title']);
+    }
+    
+    const ogDescriptionMeta = document.querySelector('meta[property="og:description"]');
+    if (ogDescriptionMeta && translations[lang]['og-description']) {
+        ogDescriptionMeta.setAttribute('content', translations[lang]['og-description']);
+    }
+    
+    // 更新Twitter meta标签
+    const twitterTitleMeta = document.querySelector('meta[property="twitter:title"]');
+    if (twitterTitleMeta && translations[lang]['twitter-title']) {
+        twitterTitleMeta.setAttribute('content', translations[lang]['twitter-title']);
+    }
+    
+    const twitterDescriptionMeta = document.querySelector('meta[property="twitter:description"]');
+    if (twitterDescriptionMeta && translations[lang]['twitter-description']) {
+        twitterDescriptionMeta.setAttribute('content', translations[lang]['twitter-description']);
+    }
+    
+    // 更新页面标题
+    const pageTitle = document.querySelector('title');
+    if (pageTitle) {
+        pageTitle.textContent = lang === 'en' ? 
+            'Sora2 - AI Video Generation Technology' : 
+            'Sora2 - AI视频生成平台';
+    }
 }
 
 // 平滑滚动到指定区域

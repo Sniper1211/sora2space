@@ -48,7 +48,15 @@ const translations = {
         
         // 语言切换
         'language-switch': '中文',
-        'current-language': 'English'
+        'current-language': 'English',
+        
+        // SEO内容
+        'meta-description': 'Sora2 - Advanced AI video generation platform that creates professional video content through simple text descriptions. AI Video Generation, Text-to-Video, Smart Creation Tools.',
+        'meta-keywords': 'AI Video Generation,Text-to-Video,Sora2,Artificial Intelligence Video,AI Creation Tools,Video Generation Platform',
+        'og-title': 'Sora2 - AI Video Generation Technology',
+        'og-description': 'Advanced AI video generation platform that creates professional video content through simple text descriptions.',
+        'twitter-title': 'Sora2 - AI Video Generation Technology',
+        'twitter-description': 'Advanced AI video generation platform that creates professional video content through simple text descriptions.'
     },
     'zh': {
         // 导航
@@ -99,6 +107,14 @@ const translations = {
         
         // 语言切换
         'language-switch': 'English',
-        'current-language': '简体中文'
+        'current-language': '简体中文',
+        
+        // SEO内容
+        'meta-description': 'Sora2 - 基于AI技术的高质量视频生成平台，通过简单文本描述创建专业视频内容。AI视频生成、文本转视频、智能创作工具。',
+        'meta-keywords': 'AI视频生成,文本转视频,Sora2,人工智能视频,AI创作工具,视频生成平台',
+        'og-title': 'Sora2 - AI视频生成平台',
+        'og-description': '基于AI技术的高质量视频生成平台，通过简单文本描述创建专业视频内容。',
+        'twitter-title': 'Sora2 - AI视频生成平台',
+        'twitter-description': '基于AI技术的高质量视频生成平台，通过简单文本描述创建专业视频内容。'
     }
 };
