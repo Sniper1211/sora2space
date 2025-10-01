@@ -21,36 +21,45 @@ function initLanguage() {
 
 // 设置语言下拉菜单
 function setupLanguageDropdown() {
-    const dropdown = document.querySelector('.language-dropdown');
-    const toggle = document.querySelector('.language-toggle');
-    const menu = document.querySelector('.language-menu');
-    const options = document.querySelectorAll('.language-option');
-    
-    // 切换下拉菜单显示/隐藏
-    toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.classList.toggle('active');
-    });
-    
-    // 点击选项切换语言
-    options.forEach(option => {
-        option.addEventListener('click', (e) => {
+    // 延迟执行确保DOM完全渲染
+    setTimeout(() => {
+        const dropdown = document.querySelector('.language-dropdown');
+        const toggle = document.querySelector('.language-toggle');
+        const menu = document.querySelector('.language-menu');
+        const options = document.querySelectorAll('.language-option');
+        
+        if (!dropdown || !toggle || !menu) {
+            console.warn('Language dropdown elements not found, retrying...');
+            setTimeout(setupLanguageDropdown, 100);
+            return;
+        }
+        
+        // 切换下拉菜单显示/隐藏
+        toggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            const lang = option.getAttribute('data-lang');
-            switchLanguage(lang);
+            dropdown.classList.toggle('active');
+        });
+        
+        // 点击选项切换语言
+        options.forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const lang = option.getAttribute('data-lang');
+                switchLanguage(lang);
+                dropdown.classList.remove('active');
+            });
+        });
+        
+        // 点击页面其他区域关闭下拉菜单
+        document.addEventListener('click', () => {
             dropdown.classList.remove('active');
         });
-    });
-    
-    // 点击页面其他区域关闭下拉菜单
-    document.addEventListener('click', () => {
-        dropdown.classList.remove('active');
-    });
-    
-    // 阻止下拉菜单内的点击事件冒泡
-    menu.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
+        
+        // 阻止下拉菜单内的点击事件冒泡
+        menu.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }, 50);
 }
 
 // 切换语言
@@ -180,26 +189,29 @@ function handleFormSubmit(e) {
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
-    // 初始化语言系统
-    initLanguage();
-    
-    // 表单提交处理
-    const contactForm = document.querySelector('.contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', handleFormSubmit);
-    }
-    
-    // 添加滚动效果
-    window.addEventListener('scroll', function() {
-        const navbar = document.querySelector('.navbar');
-        if (window.scrollY > 100) {
-            navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-            navbar.style.backdropFilter = 'blur(10px)';
-        } else {
-            navbar.style.background = '#fff';
-            navbar.style.backdropFilter = 'none';
+    // 等待CSS完全加载后再初始化
+    setTimeout(() => {
+        // 初始化语言系统
+        initLanguage();
+        
+        // 表单提交处理
+        const contactForm = document.querySelector('.contact-form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', handleFormSubmit);
         }
-    });
+        
+        // 添加滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 100) {
+                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+                navbar.style.backdropFilter = 'blur(10px)';
+            } else {
+                navbar.style.background = '#fff';
+                navbar.style.backdropFilter = 'none';
+            }
+        });
+    }, 100);
 });
 
 // 添加生成动画样式
