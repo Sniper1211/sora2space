@@ -46,6 +46,7 @@ body {
     display: flex;
     list-style: none;
     gap: 2rem;
+    align-items: center;
 }
 
 .nav-menu a {
@@ -57,6 +58,26 @@ body {
 
 .nav-menu a:hover {
     color: #2563eb;
+}
+
+.language-switcher {
+    margin-left: 1rem;
+}
+
+.btn-language {
+    background: transparent;
+    border: 2px solid #2563eb;
+    color: #2563eb;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-language:hover {
+    background: #2563eb;
+    color: white;
 }
 
 /* Hero 区域样式 */

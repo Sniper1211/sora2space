@@ -1,3 +1,59 @@
+// 语言管理
+let currentLanguage = 'en';
+
+// 初始化语言
+function initLanguage() {
+    // 检查本地存储的语言设置
+    const savedLang = localStorage.getItem('sora2-language');
+    if (savedLang) {
+        currentLanguage = savedLang;
+    }
+    
+    // 设置页面语言属性
+    document.documentElement.lang = currentLanguage;
+    
+    // 应用当前语言
+    applyLanguage(currentLanguage);
+    
+    // 添加语言切换事件监听
+    document.getElementById('language-toggle').addEventListener('click', toggleLanguage);
+}
+
+// 切换语言
+function toggleLanguage() {
+    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+    localStorage.setItem('sora2-language', currentLanguage);
+    document.documentElement.lang = currentLanguage;
+    applyLanguage(currentLanguage);
+}
+
+// 应用语言到页面
+function applyLanguage(lang) {
+    // 更新所有带有data-lang属性的元素
+    const elements = document.querySelectorAll('[data-lang]');
+    elements.forEach(element => {
+        const key = element.getAttribute('data-lang');
+        if (translations[lang] && translations[lang][key]) {
+            element.textContent = translations[lang][key];
+        }
+    });
+    
+    // 更新占位符文本
+    const placeholderElements = document.querySelectorAll('[data-lang-placeholder]');
+    placeholderElements.forEach(element => {
+        const key = element.getAttribute('data-lang-placeholder');
+        if (translations[lang] && translations[lang][key]) {
+            element.placeholder = translations[lang][key];
+        }
+    });
+    
+    // 更新语言切换按钮文本
+    const toggleBtn = document.getElementById('language-toggle');
+    if (toggleBtn && translations[lang] && translations[lang]['language-switch']) {
+        toggleBtn.textContent = translations[lang]['language-switch'];
+    }
+}
+
 // 平滑滚动到指定区域
 function scrollToSection(sectionId) {
     const element = document.getElementById(sectionId);
@@ -13,9 +69,10 @@ function scrollToSection(sectionId) {
 function generateDemo() {
     const promptInput = document.getElementById('prompt-input');
     const prompt = promptInput.value.trim();
+    const lang = currentLanguage;
     
     if (!prompt) {
-        alert('请输入视频描述');
+        alert(lang === 'en' ? 'Please enter video description' : '请输入视频描述');
         return;
     }
     
@@ -24,8 +81,8 @@ function generateDemo() {
     demoPreview.innerHTML = `
         <div class="generating-animation">
             <div class="spinner"></div>
-            <p>正在生成视频...</p>
-            <p>描述: "${prompt}"</p>
+            <p>${translations[lang]['demo-generating']}</p>
+            <p>${lang === 'en' ? 'Description' : '描述'}: "${prompt}"</p>
         </div>
     `;
     
@@ -34,10 +91,10 @@ function generateDemo() {
         demoPreview.innerHTML = `
             <div class="demo-result">
                 <div class="success-icon">✅</div>
-                <h3>视频生成完成！</h3>
-                <p>基于您的描述: "${prompt}"</p>
-                <p>这是一个演示版本，实际产品将显示生成的视频</p>
-                <button class="btn-primary" onclick="resetDemo()">重新生成</button>
+                <h3>${translations[lang]['demo-complete']}</h3>
+                <p>${lang === 'en' ? 'Based on your description' : '基于您的描述'}: "${prompt}"</p>
+                <p>${translations[lang]['demo-demo-version']}</p>
+                <button class="btn-primary" onclick="resetDemo()">${translations[lang]['demo-reset']}</button>
             </div>
         `;
     }, 2000);
@@ -46,10 +103,12 @@ function generateDemo() {
 // 重置演示
 function resetDemo() {
     const demoPreview = document.querySelector('.demo-preview');
+    const lang = currentLanguage;
+    
     demoPreview.innerHTML = `
         <div class="video-placeholder">
-            <p>视频预览区域</p>
-            <p>输入描述后点击生成查看效果</p>
+            <p>${translations[lang]['demo-preview-text1']}</p>
+            <p>${translations[lang]['demo-preview-text2']}</p>
         </div>
     `;
     
@@ -57,25 +116,32 @@ function resetDemo() {
 }
 
 // 表单提交处理
-document.addEventListener('DOMContentLoaded', function() {
-    const contactForm = document.querySelector('.contact-form');
+function handleFormSubmit(e) {
+    e.preventDefault();
+    const emailInput = this.querySelector('input[type="email"]');
+    const email = emailInput.value.trim();
+    const lang = currentLanguage;
     
+    if (email) {
+        // 模拟提交成功
+        this.innerHTML = `
+            <div class="success-message">
+                <h3>${translations[lang]['contact-success-title']}</h3>
+                <p>${translations[lang]['contact-success-message']} ${email} ${lang === 'zh' ? translations[lang]['contact-success-message2'] : ''}</p>
+            </div>
+        `;
+    }
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化语言系统
+    initLanguage();
+    
+    // 表单提交处理
+    const contactForm = document.querySelector('.contact-form');
     if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const emailInput = this.querySelector('input[type="email"]');
-            const email = emailInput.value.trim();
-            
-            if (email) {
-                // 模拟提交成功
-                this.innerHTML = `
-                    <div class="success-message">
-                        <h3>感谢您的注册！</h3>
-                        <p>我们已向 ${email} 发送了访问权限信息</p>
-                    </div>
-                `;
-            }
-        });
+        contactForm.addEventListener('submit', handleFormSubmit);
     }
     
     // 添加滚动效果
@@ -132,6 +198,19 @@ style.textContent = `
     .success-message h3 {
         color: #10b981;
         margin-bottom: 1rem;
+    }
+    
+    /* 语言切换按钮响应式 */
+    @media (max-width: 768px) {
+        .language-switcher {
+            margin-left: 0;
+            margin-top: 1rem;
+        }
+        
+        .nav-menu {
+            flex-direction: column;
+            gap: 1rem;
+        }
     }
 `;
 document.head.appendChild(style);
