@@ -115,47 +115,87 @@ function applyLanguage(lang) {
 function updateSEOMetaTags(lang) {
     if (!translations[lang]) return;
     
+    // 获取当前页面路径
+    const currentPath = window.location.pathname;
+    const pageName = getPageName(currentPath);
+    
+    // 根据页面类型设置特定的SEO内容
+    let pageTitle = 'Sora2 - AI Video Generation Technology';
+    let pageDescription = translations[lang]['meta-description'];
+    let pageKeywords = translations[lang]['meta-keywords'];
+    
+    // 根据页面类型设置特定的SEO内容
+    if (pageName === 'features') {
+        pageTitle = translations[lang]['page-features'];
+        pageDescription = translations[lang]['meta-features-description'];
+    } else if (pageName === 'pricing') {
+        pageTitle = translations[lang]['page-pricing'];
+        pageDescription = translations[lang]['meta-pricing-description'];
+    } else if (pageName === 'tutorials') {
+        pageTitle = translations[lang]['page-tutorials'];
+        pageDescription = translations[lang]['meta-tutorials-description'];
+    } else if (pageName === 'cases') {
+        pageTitle = translations[lang]['page-cases'];
+        pageDescription = translations[lang]['meta-cases-description'];
+    } else if (pageName === 'about') {
+        pageTitle = translations[lang]['page-about'];
+        pageDescription = translations[lang]['meta-about-description'];
+    } else if (pageName === 'blog') {
+        pageTitle = translations[lang]['page-blog'];
+        pageDescription = translations[lang]['meta-blog-description'];
+    }
+    
     // 更新description meta标签
     const descriptionMeta = document.querySelector('meta[name="description"]');
-    if (descriptionMeta && translations[lang]['meta-description']) {
-        descriptionMeta.setAttribute('content', translations[lang]['meta-description']);
+    if (descriptionMeta) {
+        descriptionMeta.setAttribute('content', pageDescription);
     }
     
     // 更新keywords meta标签
     const keywordsMeta = document.querySelector('meta[name="keywords"]');
-    if (keywordsMeta && translations[lang]['meta-keywords']) {
-        keywordsMeta.setAttribute('content', translations[lang]['meta-keywords']);
+    if (keywordsMeta) {
+        keywordsMeta.setAttribute('content', pageKeywords);
     }
     
     // 更新Open Graph meta标签
     const ogTitleMeta = document.querySelector('meta[property="og:title"]');
-    if (ogTitleMeta && translations[lang]['og-title']) {
-        ogTitleMeta.setAttribute('content', translations[lang]['og-title']);
+    if (ogTitleMeta) {
+        ogTitleMeta.setAttribute('content', pageTitle);
     }
     
     const ogDescriptionMeta = document.querySelector('meta[property="og:description"]');
-    if (ogDescriptionMeta && translations[lang]['og-description']) {
-        ogDescriptionMeta.setAttribute('content', translations[lang]['og-description']);
+    if (ogDescriptionMeta) {
+        ogDescriptionMeta.setAttribute('content', pageDescription);
     }
     
     // 更新Twitter meta标签
     const twitterTitleMeta = document.querySelector('meta[property="twitter:title"]');
-    if (twitterTitleMeta && translations[lang]['twitter-title']) {
-        twitterTitleMeta.setAttribute('content', translations[lang]['twitter-title']);
+    if (twitterTitleMeta) {
+        twitterTitleMeta.setAttribute('content', pageTitle);
     }
     
     const twitterDescriptionMeta = document.querySelector('meta[property="twitter:description"]');
-    if (twitterDescriptionMeta && translations[lang]['twitter-description']) {
-        twitterDescriptionMeta.setAttribute('content', translations[lang]['twitter-description']);
+    if (twitterDescriptionMeta) {
+        twitterDescriptionMeta.setAttribute('content', pageDescription);
     }
     
     // 更新页面标题
-    const pageTitle = document.querySelector('title');
-    if (pageTitle) {
-        pageTitle.textContent = lang === 'en' ? 
-            'Sora2 - AI Video Generation Technology' : 
-            'Sora2 - AI视频生成平台';
+    const titleElement = document.querySelector('title');
+    if (titleElement) {
+        titleElement.textContent = pageTitle;
     }
+}
+
+// 获取页面名称
+function getPageName(path) {
+    if (path === '/' || path.endsWith('index.html')) return 'home';
+    if (path.includes('features')) return 'features';
+    if (path.includes('pricing')) return 'pricing';
+    if (path.includes('tutorials')) return 'tutorials';
+    if (path.includes('cases')) return 'cases';
+    if (path.includes('about')) return 'about';
+    if (path.includes('blog')) return 'blog';
+    return 'home';
 }
 
 // 平滑滚动到指定区域

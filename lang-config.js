@@ -50,13 +50,37 @@ const translations = {
         'language-switch': '中文',
         'current-language': 'English',
         
+        // 导航 - 新增页面
+        'nav-features': 'Features',
+        'nav-pricing': 'Pricing',
+        'nav-tutorials': 'Tutorials',
+        'nav-cases': 'Use Cases',
+        'nav-about': 'About',
+        'nav-blog': 'Blog',
+        
+        // 页面标题
+        'page-features': 'Features - Sora2',
+        'page-pricing': 'Pricing - Sora2',
+        'page-tutorials': 'Tutorials - Sora2',
+        'page-cases': 'Use Cases - Sora2',
+        'page-about': 'About - Sora2',
+        'page-blog': 'Blog - Sora2',
+        
         // SEO内容
         'meta-description': 'Sora2 - AI video generation platform that creates professional videos from text descriptions. Text-to-video AI technology for creative content.',
         'meta-keywords': 'AI Video Generation,Text-to-Video,Sora2,AI Video Creator,Video AI',
         'og-title': 'Sora2 - AI Video Generation Technology',
         'og-description': 'Advanced AI video generation platform that creates professional video content through simple text descriptions.',
         'twitter-title': 'Sora2 - AI Video Generation Technology',
-        'twitter-description': 'Advanced AI video generation platform that creates professional video content through simple text descriptions.'
+        'twitter-description': 'Advanced AI video generation platform that creates professional video content through simple text descriptions.',
+        
+        // 各页面SEO描述
+        'meta-features-description': 'Explore Sora2 features: AI video generation, text-to-video conversion, multiple styles, fast processing, and advanced editing tools.',
+        'meta-pricing-description': 'Sora2 pricing plans: Free trial, Pro plan, and Enterprise solutions for AI video generation needs.',
+        'meta-tutorials-description': 'Learn how to use Sora2 with step-by-step tutorials for AI video generation and text-to-video creation.',
+        'meta-cases-description': 'See real-world use cases of Sora2 AI video generation technology across different industries and applications.',
+        'meta-about-description': 'Learn about Sora2 company, mission, and the team behind the AI video generation technology.',
+        'meta-blog-description': 'Sora2 blog: Latest news, updates, and insights about AI video generation technology and industry trends.'
     },
     'zh': {
         // 导航
@@ -109,12 +133,36 @@ const translations = {
         'language-switch': 'English',
         'current-language': '简体中文',
         
+        // 导航 - 新增页面
+        'nav-features': '功能特性',
+        'nav-pricing': '定价方案',
+        'nav-tutorials': '使用教程',
+        'nav-cases': '案例展示',
+        'nav-about': '关于我们',
+        'nav-blog': '博客',
+        
+        // 页面标题
+        'page-features': '功能特性 - Sora2',
+        'page-pricing': '定价方案 - Sora2',
+        'page-tutorials': '使用教程 - Sora2',
+        'page-cases': '案例展示 - Sora2',
+        'page-about': '关于我们 - Sora2',
+        'page-blog': '博客 - Sora2',
+        
         // SEO内容
         'meta-description': 'Sora2 - 基于AI技术的高质量视频生成平台，通过简单文本描述创建专业视频内容。AI视频生成、文本转视频、智能创作工具。',
         'meta-keywords': 'AI视频生成,文本转视频,Sora2,人工智能视频,AI创作工具,视频生成平台',
         'og-title': 'Sora2 - AI视频生成平台',
         'og-description': '基于AI技术的高质量视频生成平台，通过简单文本描述创建专业视频内容。',
         'twitter-title': 'Sora2 - AI视频生成平台',
-        'twitter-description': '基于AI技术的高质量视频生成平台，通过简单文本描述创建专业视频内容。'
+        'twitter-description': '基于AI技术的高质量视频生成平台，通过简单文本描述创建专业视频内容。',
+        
+        // 各页面SEO描述
+        'meta-features-description': '探索Sora2功能特性：AI视频生成、文本转视频转换、多种风格、快速处理、高级编辑工具。',
+        'meta-pricing-description': 'Sora2定价方案：免费试用、专业版计划、企业解决方案，满足不同AI视频生成需求。',
+        'meta-tutorials-description': '学习如何使用Sora2，提供AI视频生成和文本转视频创建的详细使用教程。',
+        'meta-cases-description': '查看Sora2 AI视频生成技术在不同行业和应用场景中的真实案例展示。',
+        'meta-about-description': '了解Sora2公司、使命以及AI视频生成技术背后的团队。',
+        'meta-blog-description': 'Sora2博客：关于AI视频生成技术的最新新闻、更新和行业趋势见解。'
     }
 };
