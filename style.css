@@ -37,6 +37,10 @@ body {
     height: 70px;
 }
 
+.logo a {
+    text-decoration: none;
+}
+
 .logo h2 {
     color: #2563eb;
     font-size: 1.8rem;
@@ -153,11 +157,16 @@ body {
     font-weight: 600;
 }
 
+/* 修复固定导航栏遮挡内容的问题 */
+main {
+    margin-top: 70px; /* 与导航栏高度一致 */
+}
+
 /* Hero 区域样式 */
 .hero {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 150px 0 100px;
+    padding: 80px 0 100px; /* 减少顶部内边距，因为已经有margin-top */
     text-align: center;
 }
 

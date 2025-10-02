@@ -40,6 +40,18 @@
     </script>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* 修复固定导航栏遮挡内容的问题 */
+        main {
+            margin-top: 70px; /* 与导航栏高度一致 */
+        }
+        
+        .page-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0 100px; /* 减少顶部内边距，因为已经有main的margin-top */
+            text-align: center;
+        }
+        
         .pricing-plans {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
