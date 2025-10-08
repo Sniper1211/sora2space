@@ -172,7 +172,7 @@ main {
 
 /* Hero 区域样式 */
 .hero {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #374151 0%, #111827 100%);
     color: white;
     padding: 80px 0 100px; /* 减少顶部内边距，因为已经有margin-top */
     text-align: center;
@@ -331,7 +331,7 @@ main {
 }
 
 .prompt-item {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1f2937 0%, #0f172a 100%);
     color: white;
     padding: 8px 16px;
     border-radius: 20px;
@@ -381,7 +381,7 @@ main {
 /* 联系区域样式 */
 .contact {
     padding: 100px 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #374151 0%, #111827 100%);
     color: white;
     text-align: center;
 }
