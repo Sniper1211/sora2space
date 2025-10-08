@@ -83,7 +83,7 @@
                     From marketing videos to creative content, Sora2 helps you bring your ideas to life effortlessly.
                 </p>
                 <div class="cta-buttons">
-                    <button class="btn-primary" onclick="scrollToSection('demo')" data-lang="cta-demo">Try Free Demo</button>
+                    <button class="btn-primary" onclick="scrollToSection('prompts')" data-lang="cta-prompts">View Prompts</button>
                     <button class="btn-secondary" onclick="scrollToSection('contact')" data-lang="cta-start">Start Creating Now</button>
                 </div>
             </div>
@@ -112,23 +112,13 @@
             </div>
         </section>
 
-        <section id="demo" class="demo">
+        <section id="prompts" class="prompts">
             <div class="container">
-                <h2 data-lang="demo-title">Technology Demo</h2>
-                <div class="demo-content">
-                    <div class="demo-text">
-                        <h3 data-lang="demo-subtitle">Experience the Charm of AI Video Generation</h3>
-                        <p data-lang="demo-description">Enter your creative description and witness how AI transforms it into vivid video scenes</p>
-                        <div class="demo-input">
-                            <input type="text" placeholder="Enter your video description..." id="prompt-input" data-lang-placeholder="demo-input-placeholder">
-                            <button class="btn-primary" onclick="generateDemo()" data-lang="demo-generate-btn">Generate Demo</button>
-                        </div>
-                    </div>
-                    <div class="demo-preview">
-                        <div class="video-placeholder">
-                            <p data-lang="demo-preview-text1">Video Preview Area</p>
-                            <p data-lang="demo-preview-text2">Enter description and click generate to see the effect</p>
-                        </div>
+                <h2 data-lang="prompts-title">Prompt Recommendations</h2>
+                <p class="prompts-subtitle" data-lang="prompts-subtitle">Discover inspiring prompts to create amazing videos</p>
+                <div class="prompt-cloud-container">
+                    <div class="prompt-cloud" id="prompt-cloud">
+                        <!-- 提示词将通过JavaScript动态生成 -->
                     </div>
                 </div>
             </div>

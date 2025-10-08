@@ -10,7 +10,7 @@ const translations = {
         'hero-title': 'Welcome to Sora2',
         'hero-subtitle': 'Revolutionary AI Video Generation Platform',
         'hero-description': 'Based on cutting-edge AI technology, Sora2 enables you to easily create high-quality video content. From simple text descriptions to vivid video scenes, everything is at your fingertips.',
-        'cta-demo': 'View Demo',
+        'cta-prompts': 'View Prompts',
         'cta-start': 'Get Started',
         
         // 功能特性
@@ -22,18 +22,9 @@ const translations = {
         'feature3-title': 'Diverse Styles',
         'feature3-desc': 'Support multiple video styles to meet different scenario requirements',
         
-        // 演示区域
-        'demo-title': 'Technology Demo',
-        'demo-subtitle': 'Experience the Charm of AI Video Generation',
-        'demo-description': 'Enter your creative description and witness how AI transforms it into vivid video scenes',
-        'demo-input-placeholder': 'Enter your video description...',
-        'demo-generate-btn': 'Generate Demo',
-        'demo-preview-text1': 'Video Preview Area',
-        'demo-preview-text2': 'Enter description and click generate to see the effect',
-        'demo-generating': 'Generating video...',
-        'demo-complete': 'Video generation completed!',
-        'demo-demo-version': 'This is a demo version, the actual product will display the generated video',
-        'demo-reset': 'Regenerate',
+        // 提示词推荐区域
+        'prompts-title': 'Prompt Recommendations',
+        'prompts-subtitle': 'Discover inspiring prompts to create amazing videos',
         
         // 联系区域
         'contact-title': 'Start Using Now',
@@ -92,7 +83,7 @@ const translations = {
         'hero-title': '欢迎来到 Sora2',
         'hero-subtitle': '革命性的AI视频生成平台',
         'hero-description': '基于最先进的AI技术，Sora2让您能够轻松创建高质量的视频内容。从简单的文本描述到生动的视频画面，一切尽在掌握。',
-        'cta-demo': '查看演示',
+        'cta-prompts': '查看提示词',
         'cta-start': '开始使用',
         
         // 功能特性
@@ -104,18 +95,9 @@ const translations = {
         'feature3-title': '多样化风格',
         'feature3-desc': '支持多种视频风格，满足不同场景需求',
         
-        // 演示区域
-        'demo-title': '技术演示',
-        'demo-subtitle': '体验AI视频生成的魅力',
-        'demo-description': '输入您的创意描述，见证AI如何将其转化为生动的视频画面',
-        'demo-input-placeholder': '输入您的视频描述...',
-        'demo-generate-btn': '生成演示',
-        'demo-preview-text1': '视频预览区域',
-        'demo-preview-text2': '输入描述后点击生成查看效果',
-        'demo-generating': '正在生成视频...',
-        'demo-complete': '视频生成完成！',
-        'demo-demo-version': '这是一个演示版本，实际产品将显示生成的视频',
-        'demo-reset': '重新生成',
+        // 提示词推荐区域
+        'prompts-title': '提示词推荐',
+        'prompts-subtitle': '发现精彩的提示词，创作惊艳的视频',
         
         // 联系区域
         'contact-title': '立即开始使用',
@@ -165,4 +147,72 @@ const translations = {
         'meta-about-description': '了解Sora2公司、使命以及AI视频生成技术背后的团队。',
         'meta-blog-description': 'Sora2博客：关于AI视频生成技术的最新新闻、更新和行业趋势见解。'
     }
+};
+
+// 提示词数据
+const promptsData = {
+    'en': [
+        'A cyberpunk samurai walking through neon-lit Tokyo streets in heavy rain',
+        'Time-lapse of a blooming flower garden transforming through four seasons',
+        'Underwater ballet performance with jellyfish and coral reef backdrop',
+        'Steampunk airship battle above Victorian London with clockwork mechanisms',
+        'Ancient library with floating books and magical golden dust particles',
+        'Astronaut discovering a crystal cave on an alien planet with bioluminescent life',
+        'Medieval dragon breathing rainbow fire while protecting a fairy tale castle',
+        'Coffee shop in space station with Earth view through panoramic windows',
+        'Origami crane transforming into real bird and flying through paper landscape',
+        'Vintage 1950s diner with robots serving milkshakes to time travelers',
+        'Enchanted forest where trees dance and leaves sing in harmony',
+        'Miniature world inside a snow globe with tiny people living their lives',
+        'Phoenix rising from ashes in slow motion with golden feather details',
+        'Underwater city with mermaids swimming between coral skyscrapers',
+        'Time portal opening in ancient Egyptian pyramid revealing modern city',
+        'Giant mechanical whale swimming through clouds above mountain peaks',
+        'Fairy tale cottage made of candy with gingerbread walls and chocolate roof',
+        'Holographic concert where digital musicians play for virtual audience',
+        'Arctic expedition discovering frozen mammoth with aurora borealis overhead',
+        'Floating islands connected by rainbow bridges in pastel sky',
+        'Clockwork butterfly garden with mechanical flowers blooming in sequence',
+        'Pirate ship sailing through storm of shooting stars in cosmic ocean',
+        'Glass greenhouse on Mars growing Earth plants in red soil',
+        'Medieval knight riding robotic horse through futuristic battlefield',
+        'Underwater tea party with octopus host serving kelp cookies',
+        'Crystal cathedral with light beams creating rainbow prisms everywhere',
+        'Time-traveling train passing through different historical eras',
+        'Bioluminescent mushroom forest with fairy lights and glowing creatures',
+        'Floating market in Venice with gondolas selling magical potions',
+        'Giant tree house city with rope bridges and wooden elevators'
+    ],
+    'zh': [
+        '赛博朋克武士在霓虹灯闪烁的东京街头雨夜中穿行',
+        '花园四季变迁延时摄影，从春花绽放到冬雪覆盖',
+        '水下芭蕾表演，舞者与水母共舞在珊瑚礁背景中',
+        '蒸汽朋克飞艇在维多利亚时代伦敦上空激战，齿轮机械运转',
+        '古老图书馆中书籍悬浮飞舞，金色魔法粒子闪闪发光',
+        '宇航员在外星球水晶洞穴中发现生物发光的神秘生命',
+        '中世纪巨龙喷射彩虹火焰，守护着童话般的城堡',
+        '太空站咖啡厅，透过全景窗户欣赏地球美景',
+        '纸折千纸鹤变成真鸟，在纸质风景中自由飞翔',
+        '复古50年代餐厅，机器人为时空旅行者调制奶昔',
+        '魔法森林中树木翩翩起舞，树叶和谐歌唱',
+        '雪花球内的微缩世界，小人们过着精彩的生活',
+        '凤凰浴火重生慢镜头，金色羽毛细节纤毫毕现',
+        '水下城市中美人鱼在珊瑚摩天楼间自由游弋',
+        '古埃及金字塔内时空门户开启，现代都市若隐若现',
+        '机械巨鲸在云海中游弋，俯瞰连绵山峰',
+        '糖果童话小屋，姜饼墙壁巧克力屋顶甜蜜诱人',
+        '全息音乐会，数字音乐家为虚拟观众倾情演出',
+        '北极探险队发现冰封猛犸象，极光在头顶绚烂舞动',
+        '浮空岛屿由彩虹桥连接，漂浮在粉色天空中',
+        '发条蝴蝶花园，机械花朵按序列绽放',
+        '海盗船在流星雨中航行，穿越宇宙海洋',
+        '火星玻璃温室，在红色土壤中培育地球植物',
+        '中世纪骑士骑着机器马，驰骋未来战场',
+        '水下茶话会，章鱼主人招待客人品尝海带饼干',
+        '水晶大教堂，光束创造出满天彩虹棱镜',
+        '时空旅行列车穿越不同历史时代',
+        '生物发光蘑菇森林，仙女灯光与发光生物共舞',
+        '威尼斯浮动市场，贡多拉船夫售卖神奇魔法药水',
+        '巨树屋城市，绳桥相连木质电梯上下穿梭'
+    ]
 };

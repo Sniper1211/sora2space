@@ -109,6 +109,9 @@ function applyLanguage(lang) {
     
     // 更新SEO meta标签
     updateSEOMetaTags(lang);
+    
+    // 重新初始化提示词云
+    initPromptCloud();
 }
 
 // 更新SEO meta标签
@@ -209,54 +212,72 @@ function scrollToSection(sectionId) {
     }
 }
 
-// 演示生成功能
-function generateDemo() {
-    const promptInput = document.getElementById('prompt-input');
-    const prompt = promptInput.value.trim();
-    const lang = currentLanguage;
+// 提示词推荐功能
+function initPromptCloud() {
+    const cloudContainer = document.querySelector('.prompt-cloud');
+    if (!cloudContainer) return;
     
-    if (!prompt) {
-        alert(lang === 'en' ? 'Please enter video description' : '请输入视频描述');
-        return;
+    const prompts = promptsData[currentLanguage] || promptsData['en'];
+    
+    // 清空现有内容
+    cloudContainer.innerHTML = '';
+    
+    // 创建足够的副本以实现无缝滚动，但确保不重复
+    // 使用随机排序来避免明显的重复模式
+    const shuffledPrompts = [...prompts].sort(() => Math.random() - 0.5);
+    
+    // 创建三行布局
+    for (let row = 0; row < 3; row++) {
+        const rowContainer = document.createElement('div');
+        rowContainer.className = 'prompt-row';
+        
+        // 每行创建足够的提示词以实现无缝滚动
+        for (let i = 0; i < 40; i++) {
+            const promptIndex = (row * 40 + i) % shuffledPrompts.length;
+            const prompt = shuffledPrompts[promptIndex];
+            
+            const promptItem = document.createElement('div');
+            promptItem.className = 'prompt-item';
+            promptItem.textContent = prompt;
+            promptItem.addEventListener('click', () => {
+                // 点击提示词时的交互效果
+                promptItem.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    promptItem.style.transform = '';
+                }, 200);
+                
+                // 复制到剪贴板功能
+                navigator.clipboard.writeText(prompt).then(() => {
+                    // 显示复制成功提示
+                    const tooltip = document.createElement('div');
+                    tooltip.textContent = currentLanguage === 'zh' ? '已复制!' : 'Copied!';
+                    tooltip.style.cssText = `
+                        position: absolute;
+                        background: #333;
+                        color: white;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        font-size: 12px;
+                        z-index: 1000;
+                        pointer-events: none;
+                        transform: translateY(-30px);
+                    `;
+                    promptItem.style.position = 'relative';
+                    promptItem.appendChild(tooltip);
+                    setTimeout(() => {
+                        if (tooltip.parentNode) {
+                            tooltip.parentNode.removeChild(tooltip);
+                        }
+                    }, 1000);
+                }).catch(() => {
+                    console.log('Selected prompt:', prompt);
+                });
+            });
+            rowContainer.appendChild(promptItem);
+        }
+        
+        cloudContainer.appendChild(rowContainer);
     }
-    
-    // 模拟生成过程
-    const demoPreview = document.querySelector('.demo-preview');
-    demoPreview.innerHTML = `
-        <div class="generating-animation">
-            <div class="spinner"></div>
-            <p>${translations[lang]['demo-generating']}</p>
-            <p>${lang === 'en' ? 'Description' : '描述'}: "${prompt}"</p>
-        </div>
-    `;
-    
-    // 模拟处理时间
-    setTimeout(() => {
-        demoPreview.innerHTML = `
-            <div class="demo-result">
-                <div class="success-icon">✅</div>
-                <h3>${translations[lang]['demo-complete']}</h3>
-                <p>${lang === 'en' ? 'Based on your description' : '基于您的描述'}: "${prompt}"</p>
-                <p>${translations[lang]['demo-demo-version']}</p>
-                <button class="btn-primary" onclick="resetDemo()">${translations[lang]['demo-reset']}</button>
-            </div>
-        `;
-    }, 2000);
-}
-
-// 重置演示
-function resetDemo() {
-    const demoPreview = document.querySelector('.demo-preview');
-    const lang = currentLanguage;
-    
-    demoPreview.innerHTML = `
-        <div class="video-placeholder">
-            <p>${translations[lang]['demo-preview-text1']}</p>
-            <p>${translations[lang]['demo-preview-text2']}</p>
-        </div>
-    `;
-    
-    document.getElementById('prompt-input').value = '';
 }
 
 // 表单提交处理
@@ -284,6 +305,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // 初始化语言系统
         initLanguage();
         
+        // 初始化提示词云
+        initPromptCloud();
+        
         // 表单提交处理
         const contactForm = document.querySelector('.contact-form');
         if (contactForm) {
@@ -305,49 +329,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // 添加生成动画样式
+// 动态样式
 const style = document.createElement('style');
 style.textContent = `
-    .generating-animation {
-        text-align: center;
-        padding: 2rem;
-    }
-    
-    .spinner {
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #2563eb;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 2s linear infinite;
-        margin: 0 auto 1rem;
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
-    .demo-result {
-        text-align: center;
-        padding: 2rem;
-    }
-    
-    .success-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-    
-    .success-message {
-        text-align: center;
-        padding: 2rem;
-    }
-    
-    .success-message h3 {
-        color: #10b981;
-        margin-bottom: 1rem;
-    }
-    
-    /* 语言切换按钮响应式 */
     @media (max-width: 768px) {
         .language-switcher {
             margin-left: 0;
