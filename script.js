@@ -213,25 +213,93 @@ function scrollToSection(sectionId) {
 }
 
 // 提示词推荐功能
-function initPromptCloud() {
+async function initPromptCloud() {
     const cloudContainer = document.querySelector('.prompt-cloud');
     if (!cloudContainer) return;
     
-    const prompts = promptsData[currentLanguage] || promptsData['en'];
-    
-    // 清空现有内容
+    try {
+        // 尝试从数据库加载提示词
+        const dbPrompts = await window.SupabaseAPI.getPublicPrompts(30);
+        let prompts = [];
+        
+        if (dbPrompts && dbPrompts.length > 0) {
+            // 使用数据库中的提示词
+            prompts = dbPrompts.map(p => p.title || p.content);
+        } else {
+            // 回退到本地提示词数据
+            prompts = promptsData[currentLanguage] || promptsData['en'];
+        }
+        
+        // 清空现有内容
+        cloudContainer.innerHTML = '';
+        
+        // 创建足够的副本以实现无缝滚动，但确保不重复
+        // 使用随机排序来避免明显的重复模式
+        const shuffledPrompts = [...prompts].sort(() => Math.random() - 0.5);
+        
+        // 创建三行布局
+        for (let row = 0; row < 3; row++) {
+            const rowContainer = document.createElement('div');
+            rowContainer.className = 'prompt-row';
+            
+            // 每行创建足够的提示词以实现无缝滚动
+            for (let i = 0; i < 40; i++) {
+                const promptIndex = (row * 40 + i) % shuffledPrompts.length;
+                const prompt = shuffledPrompts[promptIndex];
+                
+                const promptItem = document.createElement('div');
+                promptItem.className = 'prompt-item';
+                promptItem.innerHTML = `
+                    <span class="prompt-text">${prompt}</span>
+                    ${currentUser ? '<span class="prompt-favorite" title="收藏">♡</span>' : ''}
+                `;
+                
+                // 添加点击事件
+                promptItem.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('prompt-favorite')) {
+                        // 点击收藏按钮
+                        handlePromptFavorite(e.target, prompt);
+                        e.stopPropagation();
+                        return;
+                    }
+                    
+                    // 点击提示词时的交互效果
+                    promptItem.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        promptItem.style.transform = '';
+                    }, 200);
+                    
+                    // 复制到剪贴板功能
+                    navigator.clipboard.writeText(prompt).then(() => {
+                        // 显示复制成功提示
+                        showTooltip(promptItem, currentLanguage === 'zh' ? '已复制!' : 'Copied!');
+                    }).catch(() => {
+                        console.log('Selected prompt:', prompt);
+                    });
+                });
+                
+                rowContainer.appendChild(promptItem);
+            }
+            
+            cloudContainer.appendChild(rowContainer);
+        }
+    } catch (error) {
+        console.error('加载提示词失败:', error);
+        // 回退到本地数据
+        const prompts = promptsData[currentLanguage] || promptsData['en'];
+        renderLocalPrompts(cloudContainer, prompts);
+    }
+}
+
+// 渲染本地提示词（回退方案）
+function renderLocalPrompts(cloudContainer, prompts) {
     cloudContainer.innerHTML = '';
-    
-    // 创建足够的副本以实现无缝滚动，但确保不重复
-    // 使用随机排序来避免明显的重复模式
     const shuffledPrompts = [...prompts].sort(() => Math.random() - 0.5);
     
-    // 创建三行布局
     for (let row = 0; row < 3; row++) {
         const rowContainer = document.createElement('div');
         rowContainer.className = 'prompt-row';
         
-        // 每行创建足够的提示词以实现无缝滚动
         for (let i = 0; i < 40; i++) {
             const promptIndex = (row * 40 + i) % shuffledPrompts.length;
             const prompt = shuffledPrompts[promptIndex];
@@ -240,35 +308,13 @@ function initPromptCloud() {
             promptItem.className = 'prompt-item';
             promptItem.textContent = prompt;
             promptItem.addEventListener('click', () => {
-                // 点击提示词时的交互效果
                 promptItem.style.transform = 'scale(1.1)';
                 setTimeout(() => {
                     promptItem.style.transform = '';
                 }, 200);
                 
-                // 复制到剪贴板功能
                 navigator.clipboard.writeText(prompt).then(() => {
-                    // 显示复制成功提示
-                    const tooltip = document.createElement('div');
-                    tooltip.textContent = currentLanguage === 'zh' ? '已复制!' : 'Copied!';
-                    tooltip.style.cssText = `
-                        position: absolute;
-                        background: #333;
-                        color: white;
-                        padding: 4px 8px;
-                        border-radius: 4px;
-                        font-size: 12px;
-                        z-index: 1000;
-                        pointer-events: none;
-                        transform: translateY(-30px);
-                    `;
-                    promptItem.style.position = 'relative';
-                    promptItem.appendChild(tooltip);
-                    setTimeout(() => {
-                        if (tooltip.parentNode) {
-                            tooltip.parentNode.removeChild(tooltip);
-                        }
-                    }, 1000);
+                    showTooltip(promptItem, currentLanguage === 'zh' ? '已复制!' : 'Copied!');
                 }).catch(() => {
                     console.log('Selected prompt:', prompt);
                 });
@@ -277,6 +323,57 @@ function initPromptCloud() {
         }
         
         cloudContainer.appendChild(rowContainer);
+    }
+}
+
+// 显示提示信息
+function showTooltip(element, message) {
+    const tooltip = document.createElement('div');
+    tooltip.textContent = message;
+    tooltip.style.cssText = `
+        position: absolute;
+        background: #333;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 1000;
+        pointer-events: none;
+        transform: translateY(-30px);
+    `;
+    element.style.position = 'relative';
+    element.appendChild(tooltip);
+    setTimeout(() => {
+        if (tooltip.parentNode) {
+            tooltip.parentNode.removeChild(tooltip);
+        }
+    }, 1000);
+}
+
+// 处理提示词收藏
+async function handlePromptFavorite(favoriteBtn, promptText) {
+    if (!currentUser) {
+        showAuthModal();
+        return;
+    }
+    
+    try {
+        // 这里需要根据提示词文本找到对应的数据库记录
+        // 为简化，我们先显示一个提示
+        const isFavorited = favoriteBtn.textContent === '♥';
+        
+        if (isFavorited) {
+            favoriteBtn.textContent = '♡';
+            favoriteBtn.style.color = '';
+            showTooltip(favoriteBtn.parentElement, currentLanguage === 'zh' ? '已取消收藏' : 'Unfavorited');
+        } else {
+            favoriteBtn.textContent = '♥';
+            favoriteBtn.style.color = '#ff6b6b';
+            showTooltip(favoriteBtn.parentElement, currentLanguage === 'zh' ? '已收藏' : 'Favorited');
+        }
+    } catch (error) {
+        console.error('收藏操作失败:', error);
+        showTooltip(favoriteBtn.parentElement, currentLanguage === 'zh' ? '操作失败' : 'Failed');
     }
 }
 
@@ -302,6 +399,12 @@ function handleFormSubmit(e) {
 document.addEventListener('DOMContentLoaded', function() {
     // 等待CSS完全加载后再初始化
     setTimeout(() => {
+        // 初始化Supabase
+        initSupabase();
+        
+        // 初始化用户认证状态
+        initUserAuth();
+        
         // 初始化语言系统
         initLanguage();
         
@@ -345,3 +448,349 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ===== 用户认证相关函数 =====
+
+// 当前用户状态
+let currentUser = null;
+
+// 初始化用户认证状态
+async function initUserAuth() {
+    if (!window.SupabaseAPI) {
+        console.error('SupabaseAPI未加载');
+        return;
+    }
+    
+    // 获取当前用户
+    currentUser = await window.SupabaseAPI.getCurrentUser();
+    
+    // 监听认证状态变化
+    window.SupabaseAPI.onAuthStateChange(async (event, session) => {
+        currentUser = session?.user || null;
+        updateUIForAuthState();
+        
+        // 如果用户登录，创建或更新用户资料
+        if (event === 'SIGNED_IN' && currentUser) {
+            await ensureUserProfile(currentUser);
+        }
+    });
+    
+    // 更新UI
+    updateUIForAuthState();
+}
+
+// 确保用户资料存在
+async function ensureUserProfile(user) {
+    try {
+        let profile = await window.SupabaseAPI.getUserProfile(user.id);
+        
+        if (!profile) {
+            // 创建新的用户资料
+            profile = await window.SupabaseAPI.upsertUserProfile(user.id, {
+                username: user.email.split('@')[0],
+                display_name: user.user_metadata?.full_name || user.email.split('@')[0],
+                preferred_language: currentLanguage
+            });
+            console.log('✅ 用户资料创建成功:', profile);
+        }
+    } catch (error) {
+        console.error('❌ 用户资料处理失败:', error);
+    }
+}
+
+// 根据认证状态更新UI
+function updateUIForAuthState() {
+    const authButton = document.getElementById('auth-button');
+    const userMenu = document.getElementById('user-menu');
+    
+    if (currentUser) {
+        // 用户已登录
+        if (authButton) {
+            authButton.textContent = currentUser.email.split('@')[0];
+            authButton.onclick = toggleUserMenu;
+        }
+        
+        // 显示用户菜单
+        if (userMenu) {
+            userMenu.style.display = 'block';
+        }
+        
+        // 重新初始化提示词云以显示收藏按钮
+        initPromptCloud();
+    } else {
+        // 用户未登录
+        if (authButton) {
+            authButton.textContent = 'Login';
+            authButton.onclick = showAuthModal;
+        }
+        
+        // 隐藏用户菜单
+        if (userMenu) {
+            userMenu.style.display = 'none';
+        }
+        
+        // 重新初始化提示词云以隐藏收藏按钮
+        initPromptCloud();
+    }
+}
+
+// 显示认证模态框
+function showAuthModal() {
+    // 创建模态框HTML
+    const modalHTML = `
+        <div id="auth-modal" class="auth-modal">
+            <div class="auth-modal-content">
+                <span class="auth-close">&times;</span>
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Login</button>
+                    <button class="auth-tab" data-tab="signup">Sign Up</button>
+                </div>
+                
+                <div id="login-form" class="auth-form active">
+                    <h3>Welcome Back</h3>
+                    <form onsubmit="handleLogin(event)">
+                        <input type="email" placeholder="Email" required>
+                        <input type="password" placeholder="Password" required>
+                        <button type="submit">Login</button>
+                    </form>
+                </div>
+                
+                <div id="signup-form" class="auth-form">
+                    <h3>Create Account</h3>
+                    <form onsubmit="handleSignup(event)">
+                        <input type="text" placeholder="Display Name" required>
+                        <input type="email" placeholder="Email" required>
+                        <input type="password" placeholder="Password (min 6 chars)" required minlength="6">
+                        <button type="submit">Sign Up</button>
+                    </form>
+                </div>
+                
+                <div id="auth-message" class="auth-message"></div>
+            </div>
+        </div>
+    `;
+    
+    // 添加到页面
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // 添加事件监听
+    setupAuthModal();
+}
+
+// 设置认证模态框事件
+function setupAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    const closeBtn = document.querySelector('.auth-close');
+    const tabs = document.querySelectorAll('.auth-tab');
+    
+    // 关闭模态框
+    closeBtn.onclick = () => modal.remove();
+    window.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+    };
+    
+    // 切换标签
+    tabs.forEach(tab => {
+        tab.onclick = () => {
+            const tabName = tab.dataset.tab;
+            
+            // 更新标签状态
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // 更新表单显示
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-form`).classList.add('active');
+        };
+    });
+}
+
+// 处理登录
+async function handleLogin(event) {
+    event.preventDefault();
+    const form = event.target;
+    const email = form.querySelector('input[type="email"]').value;
+    const password = form.querySelector('input[type="password"]').value;
+    const messageEl = document.getElementById('auth-message');
+    
+    try {
+        messageEl.textContent = 'Logging in...';
+        messageEl.className = 'auth-message info';
+        
+        await window.SupabaseAPI.signInUser(email, password);
+        
+        messageEl.textContent = 'Login successful!';
+        messageEl.className = 'auth-message success';
+        
+        setTimeout(() => {
+            document.getElementById('auth-modal').remove();
+        }, 1000);
+        
+    } catch (error) {
+        messageEl.textContent = error.message;
+        messageEl.className = 'auth-message error';
+    }
+}
+
+// 处理注册
+async function handleSignup(event) {
+    event.preventDefault();
+    const form = event.target;
+    const displayName = form.querySelector('input[type="text"]').value;
+    const email = form.querySelector('input[type="email"]').value;
+    const password = form.querySelector('input[type="password"]').value;
+    const messageEl = document.getElementById('auth-message');
+    
+    try {
+        messageEl.textContent = 'Creating account...';
+        messageEl.className = 'auth-message info';
+        
+        await window.SupabaseAPI.signUpUser(email, password, {
+            full_name: displayName
+        });
+        
+        messageEl.textContent = 'Account created! Please check your email to verify.';
+        messageEl.className = 'auth-message success';
+        
+    } catch (error) {
+        messageEl.textContent = error.message;
+        messageEl.className = 'auth-message error';
+    }
+}
+
+// 切换用户菜单
+function toggleUserMenu() {
+    // 这里可以添加用户菜单的显示逻辑
+    const userMenuHTML = `
+        <div id="user-dropdown" class="user-dropdown">
+            <div class="user-info">
+                <strong>${currentUser.email}</strong>
+            </div>
+            <button onclick="showUserProfile()">Profile</button>
+            <button onclick="showFavorites()">My Favorites</button>
+            <button onclick="handleLogout()">Logout</button>
+        </div>
+    `;
+    
+    // 移除现有的下拉菜单
+    const existing = document.getElementById('user-dropdown');
+    if (existing) {
+        existing.remove();
+        return;
+    }
+    
+    // 添加新的下拉菜单
+    document.body.insertAdjacentHTML('beforeend', userMenuHTML);
+    
+    // 点击外部关闭
+    setTimeout(() => {
+        document.addEventListener('click', function closeUserMenu(e) {
+            if (!e.target.closest('#user-dropdown') && !e.target.closest('#auth-button')) {
+                const dropdown = document.getElementById('user-dropdown');
+                if (dropdown) dropdown.remove();
+                document.removeEventListener('click', closeUserMenu);
+            }
+        });
+    }, 100);
+}
+
+// 处理登出
+async function handleLogout() {
+    try {
+        await window.SupabaseAPI.signOutUser();
+        const dropdown = document.getElementById('user-dropdown');
+        if (dropdown) dropdown.remove();
+    } catch (error) {
+        console.error('登出失败:', error);
+    }
+}
+
+// 显示用户资料
+function showUserProfile() {
+    alert('用户资料功能开发中...');
+}
+
+// 显示收藏夹
+async function showFavorites() {
+    if (!currentUser) {
+        showAuthModal();
+        return;
+    }
+    
+    try {
+        const favorites = await window.SupabaseAPI.getUserFavoritePrompts(currentUser.id);
+        
+        // 创建收藏夹模态框
+        const modal = document.createElement('div');
+        modal.className = 'auth-modal';
+        modal.innerHTML = `
+            <div class="auth-modal-content">
+                <div class="auth-modal-header">
+                    <h2>${currentLanguage === 'zh' ? '我的收藏' : 'My Favorites'}</h2>
+                    <span class="auth-modal-close">&times;</span>
+                </div>
+                <div class="favorites-content">
+                    ${favorites.length === 0 ? 
+                        `<p class="no-favorites">${currentLanguage === 'zh' ? '暂无收藏的提示词' : 'No favorite prompts yet'}</p>` :
+                        favorites.map(prompt => `
+                            <div class="favorite-item">
+                                <div class="favorite-content">
+                                    <h4>${prompt.title}</h4>
+                                    <p>${prompt.description || prompt.content}</p>
+                                    <div class="favorite-tags">
+                                        ${prompt.tags ? prompt.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                                    </div>
+                                </div>
+                                <div class="favorite-actions">
+                                    <button class="copy-btn" onclick="copyToClipboard('${prompt.content}')">${currentLanguage === 'zh' ? '复制' : 'Copy'}</button>
+                                    <button class="unfavorite-btn" onclick="unfavoritePrompt('${prompt.id}')">${currentLanguage === 'zh' ? '取消收藏' : 'Unfavorite'}</button>
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // 添加关闭事件
+        const closeBtn = modal.querySelector('.auth-modal-close');
+        closeBtn.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+        
+    } catch (error) {
+        console.error('加载收藏夹失败:', error);
+        alert(currentLanguage === 'zh' ? '加载收藏夹失败' : 'Failed to load favorites');
+    }
+}
+
+// 复制到剪贴板
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert(currentLanguage === 'zh' ? '已复制到剪贴板' : 'Copied to clipboard');
+    }).catch(() => {
+        console.log('Copy failed');
+    });
+}
+
+// 取消收藏提示词
+async function unfavoritePrompt(promptId) {
+    try {
+        await window.SupabaseAPI.togglePromptFavorite(promptId);
+        // 重新加载收藏夹
+        showFavorites();
+    } catch (error) {
+        console.error('取消收藏失败:', error);
+        alert(currentLanguage === 'zh' ? '操作失败' : 'Operation failed');
+    }
+}
