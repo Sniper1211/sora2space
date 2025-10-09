@@ -464,15 +464,22 @@ async function initUserAuth() {
     // 获取当前用户
     currentUser = await window.SupabaseAPI.getCurrentUser();
     
+    // 如果用户已经登录，确保用户资料存在
+    if (currentUser) {
+        await ensureUserProfile(currentUser);
+    }
+    
     // 监听认证状态变化
     window.SupabaseAPI.onAuthStateChange(async (event, session) => {
         currentUser = session?.user || null;
-        await updateUIForAuthState();
         
-        // 如果用户登录，创建或更新用户资料
+        // 如果用户登录，先创建或更新用户资料
         if (event === 'SIGNED_IN' && currentUser) {
             await ensureUserProfile(currentUser);
         }
+        
+        // 然后更新UI
+        await updateUIForAuthState();
     });
     
     // 更新UI
