@@ -467,7 +467,7 @@ async function initUserAuth() {
     // 监听认证状态变化
     window.SupabaseAPI.onAuthStateChange(async (event, session) => {
         currentUser = session?.user || null;
-        updateUIForAuthState();
+        await updateUIForAuthState();
         
         // 如果用户登录，创建或更新用户资料
         if (event === 'SIGNED_IN' && currentUser) {
@@ -476,7 +476,7 @@ async function initUserAuth() {
     });
     
     // 更新UI
-    updateUIForAuthState();
+    await updateUIForAuthState();
 }
 
 // 确保用户资料存在
@@ -499,14 +499,22 @@ async function ensureUserProfile(user) {
 }
 
 // 根据认证状态更新UI
-function updateUIForAuthState() {
+async function updateUIForAuthState() {
     const authButton = document.getElementById('auth-button');
     const userMenu = document.getElementById('user-menu');
     
     if (currentUser) {
         // 用户已登录
         if (authButton) {
-            authButton.textContent = currentUser.email.split('@')[0];
+            // 获取用户资料以显示display name
+            try {
+                const profile = await window.SupabaseAPI.getUserProfile(currentUser.id);
+                const displayName = profile?.display_name || currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+                authButton.textContent = displayName;
+            } catch (error) {
+                console.error('获取用户资料失败:', error);
+                authButton.textContent = currentUser.email.split('@')[0];
+            }
             authButton.onclick = toggleUserMenu;
         }
         
