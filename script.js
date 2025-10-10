@@ -230,7 +230,14 @@ async function initPromptCloud() {
 
     promptCloud.innerHTML = ''; // 清空现有内容
 
-    prompts.forEach(prompt => {
+    const rows = [document.createElement('div'), document.createElement('div'), document.createElement('div')];
+    rows.forEach(row => {
+        row.className = 'prompt-row';
+        promptCloud.appendChild(row);
+    });
+
+    prompts.forEach((prompt, index) => {
+        const row = rows[index % 3];
         const card = document.createElement('div');
         card.className = 'prompt-card';
         
@@ -248,7 +255,14 @@ async function initPromptCloud() {
 
         card.appendChild(video);
         card.appendChild(overlay);
-        promptCloud.appendChild(card);
+        row.appendChild(card);
+    });
+
+    rows.forEach(row => {
+        const cards = Array.from(row.children);
+        cards.forEach(card => {
+            row.appendChild(card.cloneNode(true));
+        });
     });
 }
 
