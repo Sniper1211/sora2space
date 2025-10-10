@@ -350,6 +350,7 @@ main {
     position: relative;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
+    margin-bottom: 10px;
 }
 
 .prompt-item:nth-child(2n) {
