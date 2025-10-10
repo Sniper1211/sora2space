@@ -214,19 +214,23 @@ function scrollToSection(sectionId) {
 
 // 提示词推荐功能
 async function initPromptCloud() {
-    const cloudContainer = document.querySelector('.prompt-cloud');
+    const cloudContainer = document.querySelector('.prompt-cloud-container');
     if (!cloudContainer) return;
     
     try {
-        // 尝试从数据库加载提示词
-        const dbPrompts = await window.SupabaseAPI.getPublicPrompts(30);
+        // 从数据库加载提示词
         let prompts = [];
         
-        if (dbPrompts && dbPrompts.length > 0) {
-            // 使用数据库中的提示词
-            prompts = dbPrompts.map(p => p.title || p.content);
-        } else {
-            // 回退到本地提示词数据
+        if (window.SupabaseAPI && window.SupabaseAPI.getRandomPrompts) {
+            const dbPrompts = await window.SupabaseAPI.getRandomPrompts(currentLanguage, 30);
+            if (dbPrompts && dbPrompts.length > 0) {
+                // 使用数据库中的提示词（保留完整对象）
+                prompts = dbPrompts;
+            }
+        }
+        
+        // 如果数据库没有数据，回退到本地提示词数据
+        if (prompts.length === 0) {
             prompts = promptsData[currentLanguage] || promptsData['en'];
         }
         
@@ -245,20 +249,28 @@ async function initPromptCloud() {
             // 每行创建足够的提示词以实现无缝滚动
             for (let i = 0; i < 40; i++) {
                 const promptIndex = (row * 40 + i) % shuffledPrompts.length;
-                const prompt = shuffledPrompts[promptIndex];
+                const promptData = shuffledPrompts[promptIndex];
+                
+                // 兼容新旧数据格式
+                const promptText = typeof promptData === 'string' ? promptData : promptData.content;
+                const promptId = typeof promptData === 'object' ? promptData.id : null;
                 
                 const promptItem = document.createElement('div');
                 promptItem.className = 'prompt-item';
                 promptItem.innerHTML = `
-                    <span class="prompt-text">${prompt}</span>
+                    <span class="prompt-text">${promptText}</span>
                     ${currentUser ? '<span class="prompt-favorite" title="收藏">♡</span>' : ''}
                 `;
                 
+                // 保存提示词数据到元素上
+                promptItem.dataset.promptId = promptId;
+                promptItem.dataset.promptText = promptText;
+                
                 // 添加点击事件
-                promptItem.addEventListener('click', (e) => {
+                promptItem.addEventListener('click', async (e) => {
                     if (e.target.classList.contains('prompt-favorite')) {
                         // 点击收藏按钮
-                        handlePromptFavorite(e.target, prompt);
+                        handlePromptFavorite(e.target, promptText);
                         e.stopPropagation();
                         return;
                     }
@@ -269,8 +281,17 @@ async function initPromptCloud() {
                         promptItem.style.transform = '';
                     }, 200);
                     
+                    // 统计使用次数（如果有ID）
+                    if (promptId && window.SupabaseAPI && window.SupabaseAPI.incrementPromptUsage) {
+                        try {
+                            await window.SupabaseAPI.incrementPromptUsage(promptId);
+                        } catch (error) {
+                            console.log('统计使用次数失败:', error);
+                        }
+                    }
+                    
                     // 复制到剪贴板功能
-                    navigator.clipboard.writeText(prompt).then(() => {
+                    navigator.clipboard.writeText(promptText).then(() => {
                         // 显示复制成功提示
                         showTooltip(promptItem, currentLanguage === 'zh' ? '已复制!' : 'Copied!');
                     }).catch(() => {

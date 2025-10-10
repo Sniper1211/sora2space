@@ -141,28 +141,146 @@ async function upsertUserProfile(userId, profileData) {
     return data;
 }
 
-// 获取公开提示词
-async function getPublicPrompts(limit = 20, offset = 0) {
+// 获取提示词列表
+async function getPrompts(options = {}) {
+    if (!supabase) {
+        throw new Error('Supabase未初始化');
+    }
+    
+    const {
+        language = 'en',
+        category = null,
+        featured = null,
+        limit = 30,
+        offset = 0
+    } = options;
+    
+    let query = supabase
+        .from('prompts')
+        .select('*')
+        .eq('is_active', true)
+        .eq('language', language)
+        .order('created_at', { ascending: false });
+    
+    if (category) {
+        query = query.eq('category', category);
+    }
+    
+    if (featured !== null) {
+        query = query.eq('is_featured', featured);
+    }
+    
+    if (limit > 0) {
+        query = query.range(offset, offset + limit - 1);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+        console.error('获取提示词失败:', error);
+        throw error;
+    }
+    
+    return data || [];
+}
+
+// 获取随机提示词
+async function getRandomPrompts(language = 'en', count = 30) {
+    if (!supabase) {
+        throw new Error('Supabase未初始化');
+    }
+    
+    const { data, error } = await supabase
+        .rpc('get_random_prompts', {
+            lang: language,
+            prompt_count: count
+        });
+    
+    if (error) {
+        console.error('获取随机提示词失败:', error);
+        // 如果RPC函数不存在，回退到普通查询
+        return getPrompts({ language, limit: count });
+    }
+    
+    return data || [];
+}
+
+// 增加提示词使用次数
+async function incrementPromptUsage(promptId) {
+    if (!supabase) {
+        throw new Error('Supabase未初始化');
+    }
+    
+    const { error } = await supabase
+        .rpc('increment_prompt_usage', { prompt_id: promptId });
+    
+    if (error) {
+        console.error('更新提示词使用次数失败:', error);
+        // 如果RPC函数不存在，使用普通更新
+        const { data: prompt } = await supabase
+            .from('prompts')
+            .select('usage_count')
+            .eq('id', promptId)
+            .single();
+        
+        if (prompt) {
+            await supabase
+                .from('prompts')
+                .update({ usage_count: (prompt.usage_count || 0) + 1 })
+                .eq('id', promptId);
+        }
+    }
+}
+
+// 创建新提示词
+async function createPrompt(promptData) {
+    if (!supabase) {
+        throw new Error('Supabase未初始化');
+    }
+    
+    const user = await getCurrentUser();
+    if (!user) {
+        throw new Error('用户未登录');
+    }
+    
+    const { data, error } = await supabase
+        .from('prompts')
+        .insert({
+            ...promptData,
+            created_by: user.id
+        })
+        .select()
+        .single();
+    
+    if (error) {
+        console.error('创建提示词失败:', error);
+        throw error;
+    }
+    
+    return data;
+}
+
+// 获取提示词分类
+async function getPromptCategories(language = 'en') {
     if (!supabase) {
         throw new Error('Supabase未初始化');
     }
     
     const { data, error } = await supabase
         .from('prompts')
-        .select(`
-            *,
-            prompt_categories(name, icon),
-            user_profiles(username, display_name)
-        `)
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
+        .select('category')
+        .eq('language', language)
+        .eq('is_active', true)
+        .not('category', 'is', null);
     
     if (error) {
+        console.error('获取提示词分类失败:', error);
         throw error;
     }
     
-    return data;
+    // 去重并返回分类列表
+    const categories = [...new Set(data.map(item => item.category))];
+    return categories.filter(cat => cat);
 }
 
 // 获取用户收藏的提示词
@@ -228,7 +346,7 @@ async function togglePromptFavorite(userId, promptId) {
     }
 }
 
-// 导出所有函数供全局使用
+// 导出API到全局对象
 window.SupabaseAPI = {
     initSupabase,
     getCurrentUser,
@@ -238,7 +356,11 @@ window.SupabaseAPI = {
     onAuthStateChange,
     getUserProfile,
     upsertUserProfile,
-    getPublicPrompts,
+    getPrompts,
+    getRandomPrompts,
+    incrementPromptUsage,
+    createPrompt,
+    getPromptCategories,
     getUserFavoritePrompts,
     togglePromptFavorite
 };

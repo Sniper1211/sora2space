@@ -42,16 +42,14 @@ CREATE TABLE IF NOT EXISTS prompt_categories (
 -- 提示词表
 CREATE TABLE IF NOT EXISTS prompts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title VARCHAR(200) NOT NULL,
-  content TEXT NOT NULL,
-  description TEXT,
-  category_id UUID REFERENCES prompt_categories(id),
-  created_by UUID REFERENCES auth.users(id),
-  is_public BOOLEAN DEFAULT true,
-  is_featured BOOLEAN DEFAULT false,
-  tags TEXT[], -- 标签数组
-  use_count INTEGER DEFAULT 0,
-  like_count INTEGER DEFAULT 0,
+  content TEXT NOT NULL,                    -- 提示词内容
+  language VARCHAR(10) NOT NULL DEFAULT 'en', -- 语言代码 (en, zh, etc.)
+  category VARCHAR(50),                     -- 分类 (sci-fi, fantasy, nature, etc.)
+  tags TEXT[],                             -- 标签数组
+  is_featured BOOLEAN DEFAULT false,        -- 是否为精选提示词
+  is_active BOOLEAN DEFAULT true,           -- 是否激活显示
+  created_by UUID REFERENCES auth.users(id), -- 创建者 (可为空，系统提示词)
+  usage_count INTEGER DEFAULT 0,           -- 使用次数统计
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -74,43 +72,94 @@ CREATE TABLE IF NOT EXISTS prompt_likes (
   UNIQUE(user_id, prompt_id)
 );
 
+-- 删除重复的提示词表定义（已在上面定义过）
+-- 如果需要修改表结构，请使用 ALTER TABLE 语句
+
+-- 创建索引以提高查询性能 (使用 IF NOT EXISTS 避免重复创建)
+CREATE INDEX IF NOT EXISTS idx_prompts_language ON prompts(language);
+CREATE INDEX IF NOT EXISTS idx_prompts_category ON prompts(category);
+CREATE INDEX IF NOT EXISTS idx_prompts_is_active ON prompts(is_active);
+CREATE INDEX IF NOT EXISTS idx_prompts_is_featured ON prompts(is_featured);
+CREATE INDEX IF NOT EXISTS idx_prompts_created_at ON prompts(created_at);
+
 -- ===== Row Level Security (RLS) 策略 =====
 
 -- 启用RLS
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_usage ENABLE ROW LEVEL SECURITY;
-ALTER TABLE prompts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_prompt_favorites ENABLE ROW LEVEL SECURITY;
-ALTER TABLE prompt_likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prompts ENABLE ROW LEVEL SECURITY;
 
--- 用户资料策略
-CREATE POLICY "Users can view own profile" ON user_profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can update own profile" ON user_profiles FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY "Users can insert own profile" ON user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
+-- 删除可能存在的旧 RLS 策略
+DROP POLICY IF EXISTS "用户可以查看所有用户资料" ON user_profiles;
+DROP POLICY IF EXISTS "用户只能插入自己的资料" ON user_profiles;
+DROP POLICY IF EXISTS "用户只能更新自己的资料" ON user_profiles;
+DROP POLICY IF EXISTS "用户只能查看自己的收藏" ON user_prompt_favorites;
+DROP POLICY IF EXISTS "用户只能插入自己的收藏" ON user_prompt_favorites;
+DROP POLICY IF EXISTS "用户只能删除自己的收藏" ON user_prompt_favorites;
+DROP POLICY IF EXISTS "所有人可以查看激活的提示词" ON prompts;
+DROP POLICY IF EXISTS "认证用户可以创建提示词" ON prompts;
+DROP POLICY IF EXISTS "用户只能更新自己创建的提示词" ON prompts;
+DROP POLICY IF EXISTS "用户只能删除自己创建的提示词" ON prompts;
 
--- 用户使用统计策略
-CREATE POLICY "Users can view own usage" ON user_usage FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own usage" ON user_usage FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- 用户资料的RLS策略
+CREATE POLICY "用户可以查看所有用户资料" ON user_profiles FOR SELECT USING (true);
+CREATE POLICY "用户只能插入自己的资料" ON user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "用户只能更新自己的资料" ON user_profiles FOR UPDATE USING (auth.uid() = id);
 
--- 提示词策略
-CREATE POLICY "Public prompts are viewable by everyone" ON prompts FOR SELECT USING (is_public = true);
-CREATE POLICY "Users can view own prompts" ON prompts FOR SELECT USING (auth.uid() = created_by);
-CREATE POLICY "Users can create prompts" ON prompts FOR INSERT WITH CHECK (auth.uid() = created_by);
-CREATE POLICY "Users can update own prompts" ON prompts FOR UPDATE USING (auth.uid() = created_by);
-CREATE POLICY "Users can delete own prompts" ON prompts FOR DELETE USING (auth.uid() = created_by);
+-- 用户收藏的RLS策略
+CREATE POLICY "用户只能查看自己的收藏" ON user_prompt_favorites FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "用户只能插入自己的收藏" ON user_prompt_favorites FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "用户只能删除自己的收藏" ON user_prompt_favorites FOR DELETE USING (auth.uid() = user_id);
 
--- 收藏策略
-CREATE POLICY "Users can view own favorites" ON user_prompt_favorites FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own favorites" ON user_prompt_favorites FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can delete own favorites" ON user_prompt_favorites FOR DELETE USING (auth.uid() = user_id);
+-- 提示词的RLS策略
+CREATE POLICY "所有人可以查看激活的提示词" ON prompts FOR SELECT USING (is_active = true);
+CREATE POLICY "认证用户可以创建提示词" ON prompts FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "用户只能更新自己创建的提示词" ON prompts FOR UPDATE USING (auth.uid() = created_by);
+CREATE POLICY "用户只能删除自己创建的提示词" ON prompts FOR DELETE USING (auth.uid() = created_by);
 
--- 点赞策略
-CREATE POLICY "Users can view all likes" ON prompt_likes FOR SELECT USING (true);
-CREATE POLICY "Users can manage own likes" ON prompt_likes FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can delete own likes" ON prompt_likes FOR DELETE USING (auth.uid() = user_id);
+-- ===== 数据库函数 =====
+
+-- 获取随机提示词函数
+CREATE OR REPLACE FUNCTION get_random_prompts(lang TEXT DEFAULT 'en', prompt_count INTEGER DEFAULT 30)
+RETURNS TABLE (
+    id UUID,
+    content TEXT,
+    language VARCHAR(10),
+    category VARCHAR(50),
+    tags TEXT[],
+    is_featured BOOLEAN,
+    is_active BOOLEAN,
+    created_by UUID,
+    usage_count INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE
+) 
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+    SELECT p.id, p.content, p.language, p.category, p.tags, p.is_featured, 
+           p.is_active, p.created_by, p.usage_count, p.created_at, p.updated_at
+    FROM prompts p
+    WHERE p.language = lang AND p.is_active = true
+    ORDER BY RANDOM()
+    LIMIT prompt_count;
+$$;
+
+-- 增加提示词使用次数函数
+CREATE OR REPLACE FUNCTION increment_prompt_usage(prompt_id UUID)
+RETURNS void
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+    UPDATE prompts 
+    SET usage_count = COALESCE(usage_count, 0) + 1,
+        updated_at = NOW()
+    WHERE id = prompt_id AND is_active = true;
+$$;
 
 -- 分类表公开可读
 ALTER TABLE prompt_categories ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Categories are viewable by everyone" ON prompt_categories;
 CREATE POLICY "Categories are viewable by everyone" ON prompt_categories FOR SELECT USING (true);
 
 -- ===== 初始数据插入 =====
@@ -125,39 +174,7 @@ INSERT INTO prompt_categories (name, description, icon, sort_order) VALUES
 ('Technology & Sci-Fi', 'Futuristic and tech themes', '🚀', 6)
 ON CONFLICT DO NOTHING;
 
--- 插入示例提示词
-INSERT INTO prompts (title, content, description, category_id, is_public, is_featured, tags) 
-SELECT 
-  'Cinematic Ocean Waves',
-  'A cinematic shot of powerful ocean waves crashing against rocky cliffs during golden hour, with dramatic lighting and slow motion effect',
-  'Perfect for creating dramatic ocean scenes with cinematic quality',
-  (SELECT id FROM prompt_categories WHERE name = 'Nature & Landscape' LIMIT 1),
-  true,
-  true,
-  ARRAY['ocean', 'cinematic', 'nature', 'dramatic']
-WHERE NOT EXISTS (SELECT 1 FROM prompts WHERE title = 'Cinematic Ocean Waves');
-
-INSERT INTO prompts (title, content, description, category_id, is_public, is_featured, tags) 
-SELECT 
-  'Futuristic City Flythrough',
-  'A smooth aerial flythrough of a futuristic cyberpunk city at night, with neon lights, flying cars, and towering skyscrapers',
-  'Great for sci-fi and futuristic video content',
-  (SELECT id FROM prompt_categories WHERE name = 'Technology & Sci-Fi' LIMIT 1),
-  true,
-  true,
-  ARRAY['cyberpunk', 'futuristic', 'city', 'aerial']
-WHERE NOT EXISTS (SELECT 1 FROM prompts WHERE title = 'Futuristic City Flythrough');
-
-INSERT INTO prompts (title, content, description, category_id, is_public, is_featured, tags) 
-SELECT 
-  'Character Walking Animation',
-  'A 3D character walking cycle animation with natural movement, realistic lighting, and smooth transitions',
-  'Basic character animation for storytelling',
-  (SELECT id FROM prompt_categories WHERE name = 'Characters & People' LIMIT 1),
-  true,
-  false,
-  ARRAY['character', 'animation', 'walking', '3d']
-WHERE NOT EXISTS (SELECT 1 FROM prompts WHERE title = 'Character Walking Animation');
+-- 示例提示词数据将通过 migrate-prompts.sql 脚本单独导入
 
 -- ===== 触发器和函数 =====
 
@@ -181,35 +198,18 @@ CREATE TRIGGER update_prompts_updated_at
     BEFORE UPDATE ON prompts 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- 提示词点赞计数更新函数
-CREATE OR REPLACE FUNCTION update_prompt_like_count()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF TG_OP = 'INSERT' THEN
-        UPDATE prompts SET like_count = like_count + 1 WHERE id = NEW.prompt_id;
-        RETURN NEW;
-    ELSIF TG_OP = 'DELETE' THEN
-        UPDATE prompts SET like_count = like_count - 1 WHERE id = OLD.prompt_id;
-        RETURN OLD;
-    END IF;
-    RETURN NULL;
-END;
-$$ language 'plpgsql';
-
--- 点赞计数触发器
-DROP TRIGGER IF EXISTS prompt_like_count_trigger ON prompt_likes;
-CREATE TRIGGER prompt_like_count_trigger
-    AFTER INSERT OR DELETE ON prompt_likes
-    FOR EACH ROW EXECUTE FUNCTION update_prompt_like_count();
+-- 注意：点赞计数功能已移除，因为当前表结构中没有 like_count 字段
+-- 如果需要点赞功能，可以通过查询 prompt_likes 表来统计
+-- 或者添加 like_count 字段到 prompts 表中
 
 -- ===== 索引优化 =====
 
--- 为常用查询添加索引
-CREATE INDEX IF NOT EXISTS idx_prompts_public ON prompts(is_public) WHERE is_public = true;
-CREATE INDEX IF NOT EXISTS idx_prompts_featured ON prompts(is_featured) WHERE is_featured = true;
-CREATE INDEX IF NOT EXISTS idx_prompts_category ON prompts(category_id);
+-- 为常用查询添加索引 (移除重复的索引定义，使用正确的字段名)
+-- 注意：基础索引已在上面创建，这里只添加额外的优化索引
+CREATE INDEX IF NOT EXISTS idx_prompts_active_featured ON prompts(is_active, is_featured) WHERE is_active = true;
+CREATE INDEX IF NOT EXISTS idx_prompts_category_active ON prompts(category, is_active) WHERE is_active = true;
 CREATE INDEX IF NOT EXISTS idx_prompts_created_by ON prompts(created_by);
-CREATE INDEX IF NOT EXISTS idx_prompts_created_at ON prompts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_prompts_usage_count ON prompts(usage_count DESC);
 CREATE INDEX IF NOT EXISTS idx_user_favorites_user ON user_prompt_favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_favorites_prompt ON user_prompt_favorites(prompt_id);
 
