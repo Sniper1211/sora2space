@@ -301,6 +301,29 @@ main {
 .prompt-cloud-container {
     height: auto;
     overflow: hidden;
+    position: relative; /* 为渐变效果添加 */
+}
+
+/* 为容器左右两侧添加渐变效果 */
+.prompt-cloud-container::before,
+.prompt-cloud-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100px; /* 渐变宽度 */
+    z-index: 10;
+    pointer-events: none; /* 允许点击穿透 */
+}
+
+.prompt-cloud-container::before {
+    left: 0;
+    background: linear-gradient(to right, #f8fafc, transparent);
+}
+
+.prompt-cloud-container::after {
+    right: 0;
+    background: linear-gradient(to left, #f8fafc, transparent);
 }
 
 .prompt-cloud {
@@ -314,7 +337,7 @@ main {
     flex-direction: row;
     gap: 20px;
     width: max-content;
-    animation: scrollPrompts 40s linear infinite;
+    animation: scrollPrompts 80s linear infinite; /* 减慢滚动速度 */
 }
 
 .prompt-row:nth-child(2) {
@@ -322,8 +345,8 @@ main {
 }
 
 .prompt-card {
-    width: 180px; /* 调整宽度以实现9:16比例 */
-    height: 320px; /* 调整高度以实现9:16比例 */
+    width: 135px; /* 减小卡片尺寸 */
+    height: 240px; /* 减小卡片尺寸 (保持9:16) */
     position: relative;
     border-radius: 15px;
     overflow: hidden;
