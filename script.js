@@ -243,7 +243,7 @@ async function initPromptCloud() {
         
         const video = document.createElement('video');
         video.className = 'card-video';
-        video.src = 'https://videos.openai.com/vg-assets/assets%2Ftask_01k7772d18f7ftxkqvaw29m60r%2Ftask_01k7772d18f7ftxkqvaw29m60r_genid_fc740713-4a0a-41c3-89cc-a55991947634_25_10_10_14_07_611929%2Fvideos%2F00000_wm%2Fmd.mp4?st=2025-10-10T13%3A34%3A13Z&se=2025-10-16T14%3A34%3A13Z&sks=b&skt=2025-10-10T13%3A34%3A13Z&ske=2025-10-16T14%3A34%3A13Z&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skoid=3d249c53-07fa-4ba4-9b65-0bf8eb4ea46a&skv=2019-02-02&sv=2018-11-09&sr=b&sp=r&spr=https%2Chttp&sig=Mk8Y6MH7haaxwlbb6HMfwrRLTH2iO%2BBxBuMMkXW9aqA%3D&az=oaivgprodscus';
+        video.src = prompt.video_url || 'https://videos.openai.com/vg-assets/assets%2Ftask_01k7772d18f7ftxkqvaw29m60r%2Ftask_01k7772d18f7ftxkqvaw29m60r_genid_fc740713-4a0a-41c3-89cc-a55991947634_25_10_10_14_07_611929%2Fvideos%2F00000_wm%2Fmd.mp4?st=2025-10-10T13%3A34%3A13Z&se=2025-10-16T14%3A34%3A13Z&sks=b&skt=2025-10-10T13%3A34%3A13Z&ske=2025-10-16T14%3A34%3A13Z&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skoid=3d249c53-07fa-4ba4-9b65-0bf8eb4ea46a&skv=2019-02-02&sv=2018-11-09&sr=b&sp=r&spr=https%2Chttp&sig=Mk8Y6MH7haaxwlbb6HMfwrRLTH2iO%2BBxBuMMkXW9aqA%3D&az=oaivgprodscus'; // 使用数据库中的 video_url，如果不存在则使用默认值
         video.autoplay = true;
         video.muted = true;
         video.loop = true;
