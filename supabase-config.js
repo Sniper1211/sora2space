@@ -202,7 +202,29 @@ async function getRandomPrompts(language = 'en', count = 30) {
         return getPrompts({ language, limit: count });
     }
     
-    return data || [];
+    // 某些数据库版本的函数未返回 video_url，这里补充一次查询并合并
+    let rows = data || [];
+    try {
+        const ids = rows.map(r => r.id).filter(Boolean);
+        if (ids.length > 0) {
+            const { data: videos, error: vErr } = await supabase
+                .from('prompts')
+                .select('id, video_url')
+                .in('id', ids);
+
+            if (!vErr && Array.isArray(videos)) {
+                const videoMap = new Map(videos.map(v => [v.id, v.video_url]));
+                rows = rows.map(r => ({
+                    ...r,
+                    video_url: r.video_url ?? videoMap.get(r.id) ?? null
+                }));
+            }
+        }
+    } catch (mergeErr) {
+        console.warn('补充视频链接失败:', mergeErr);
+    }
+
+    return rows;
 }
 
 // 增加提示词使用次数

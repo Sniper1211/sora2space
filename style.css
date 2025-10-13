@@ -370,6 +370,34 @@ main {
     z-index: 1;
 }
 
+/* 无视频卡片的颜色占位块（与视频同尺寸与层级） */
+.card-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+/* 为占位块增加轻微的多样性与活力（按卡片序号） */
+.prompt-card:nth-child(2n) .card-placeholder {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+}
+.prompt-card:nth-child(3n) .card-placeholder {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+}
+.prompt-card:nth-child(4n) .card-placeholder {
+    background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+}
+.prompt-card:nth-child(5n) .card-placeholder {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+}
+.prompt-card:nth-child(6n) .card-placeholder {
+    background: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%);
+}
+
 .card-overlay {
     position: absolute;
     bottom: 0;

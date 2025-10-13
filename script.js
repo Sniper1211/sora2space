@@ -236,45 +236,69 @@ async function initPromptCloud() {
         promptCloud.appendChild(row);
     });
 
+    // 简单校验视频链接是否有效（以 http 开头且扩展名为 mp4/webm）
+    const isValidVideoUrl = (url) => {
+        if (!url || typeof url !== 'string') return false;
+        return /^https?:\/\//.test(url) && /\.(mp4|webm)(\?.*)?$/.test(url);
+    };
+
     prompts.forEach((prompt, index) => {
         const row = rows[index % 3];
         const card = document.createElement('div');
         card.className = 'prompt-card';
         
-        const video = document.createElement('video');
-        video.className = 'card-video';
-        video.setAttribute('data-src', prompt.video_url || 'https://videos.openai.com/vg-assets/assets%2Ftask_01k7772d18f7ftxkqvaw29m60r%2Ftask_01k7772d18f7ftxkqvaw29m60r_genid_fc740713-4a0a-41c3-89cc-a55991947634_25_10_10_14_07_611929%2Fvideos%2F00000_wm%2Fmd.mp4?st=2025-10-10T13%3A34%3A13Z&se=2025-10-16T14%3A34%3A13Z&sks=b&skt=2025-10-10T13%3A34%3A13Z&ske=2025-10-16T14%3A34%3A13Z&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skoid=3d249c53-07fa-4ba4-9b65-0bf8eb4ea46a&skv=2019-02-02&sv=2018-11-09&sr=b&sp=r&spr=https%2Chttp&sig=Mk8Y6MH7haaxwlbb6HMfwrRLTH2iO%2BBxBuMMkXW9aqA%3D&az=oaivgprodscus');
-        video.muted = true;
-        video.defaultMuted = true;
-        video.setAttribute('muted', '');
-        video.volume = 0;
-        video.loop = true;
-        video.playsInline = true;
+        const hasVideo = isValidVideoUrl(prompt.video_url);
+        let video;
+        const placeholder = document.createElement('div');
+        placeholder.className = 'card-placeholder';
+        
+        if (hasVideo) {
+            video = document.createElement('video');
+            video.className = 'card-video';
+            video.setAttribute('data-src', prompt.video_url);
+            video.muted = true;
+            video.defaultMuted = true;
+            video.setAttribute('muted', '');
+            video.volume = 0;
+            video.loop = true;
+            video.playsInline = true;
 
-        // 加强静音保障：在关键事件中强制静音
-        video.addEventListener('loadeddata', () => {
-            video.muted = true;
-            video.defaultMuted = true;
-            video.volume = 0;
-        });
-        video.addEventListener('play', () => {
-            video.muted = true;
-            video.defaultMuted = true;
-            video.volume = 0;
-        });
-        video.addEventListener('volumechange', () => {
-            if (!video.muted || video.volume > 0) {
+            // 加强静音保障：在关键事件中强制静音
+            video.addEventListener('loadeddata', () => {
                 video.muted = true;
                 video.defaultMuted = true;
                 video.volume = 0;
-            }
-        });
+            });
+            video.addEventListener('play', () => {
+                video.muted = true;
+                video.defaultMuted = true;
+                video.volume = 0;
+            });
+            video.addEventListener('volumechange', () => {
+                if (!video.muted || video.volume > 0) {
+                    video.muted = true;
+                    video.defaultMuted = true;
+                    video.volume = 0;
+                }
+            });
+            // 加载失败时回退为占位块
+            video.addEventListener('error', () => {
+                try {
+                    video.remove();
+                } catch (e) {}
+                card.insertBefore(placeholder, card.firstChild);
+            });
+        }
 
         const overlay = document.createElement('div');
         overlay.className = 'card-overlay';
         overlay.textContent = prompt.title;
-
-        card.appendChild(video);
+        
+        if (hasVideo) {
+            card.appendChild(video);
+        } else {
+            card.appendChild(placeholder);
+        }
         card.appendChild(overlay);
         row.appendChild(card);
     });
@@ -289,6 +313,7 @@ async function initPromptCloud() {
     const videoObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             const video = entry.target.querySelector('.card-video');
+            if (!video) return; // 无视频卡片不处理
             if (entry.isIntersecting) {
                 if (!video.src) {
                     video.src = video.dataset.src;
@@ -305,7 +330,9 @@ async function initPromptCloud() {
     }, { threshold: 0.5 });
 
     document.querySelectorAll('.prompt-card').forEach(card => {
-        videoObserver.observe(card);
+        if (card.querySelector('.card-video')) {
+            videoObserver.observe(card);
+        }
     });
 }
 
