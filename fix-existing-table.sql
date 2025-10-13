@@ -112,6 +112,7 @@ CREATE POLICY "用户只能删除自己创建的提示词" ON prompts FOR DELETE
 CREATE OR REPLACE FUNCTION get_random_prompts(lang TEXT DEFAULT 'en', prompt_count INTEGER DEFAULT 30)
 RETURNS TABLE (
     id UUID,
+    title TEXT,
     content TEXT,
     language VARCHAR(10),
     category VARCHAR(50),
@@ -121,13 +122,14 @@ RETURNS TABLE (
     created_by UUID,
     usage_count INTEGER,
     created_at TIMESTAMP WITH TIME ZONE,
-    updated_at TIMESTAMP WITH TIME ZONE
+    updated_at TIMESTAMP WITH TIME ZONE,
+    video_url TEXT
 ) 
 LANGUAGE sql
 SECURITY DEFINER
 AS $$
-    SELECT p.id, p.content, p.language, p.category, p.tags, p.is_featured, 
-           p.is_active, p.created_by, p.usage_count, p.created_at, p.updated_at
+    SELECT p.id, p.title, p.content, p.language, p.category, p.tags, p.is_featured, 
+           p.is_active, p.created_by, p.usage_count, p.created_at, p.updated_at, p.video_url
     FROM prompts p
     WHERE p.language = lang AND p.is_active = true
     ORDER BY RANDOM()

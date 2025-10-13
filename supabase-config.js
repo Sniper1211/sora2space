@@ -202,23 +202,28 @@ async function getRandomPrompts(language = 'en', count = 30) {
         return getPrompts({ language, limit: count });
     }
     
-    // 某些数据库版本的函数未返回 video_url，这里补充一次查询并合并
-    let rows = data || [];
+    // 某些数据库版本的函数可能未返回 video_url，这里仅在全部缺失时补齐一次查询
+    const rows = data || [];
+    const allMissingVideo = rows.length > 0 && rows.every(r => r.video_url == null);
+    if (!allMissingVideo) {
+        return rows;
+    }
+
     try {
         const ids = rows.map(r => r.id).filter(Boolean);
-        if (ids.length > 0) {
-            const { data: videos, error: vErr } = await supabase
-                .from('prompts')
-                .select('id, video_url')
-                .in('id', ids);
+        if (ids.length === 0) return rows;
 
-            if (!vErr && Array.isArray(videos)) {
-                const videoMap = new Map(videos.map(v => [v.id, v.video_url]));
-                rows = rows.map(r => ({
-                    ...r,
-                    video_url: r.video_url ?? videoMap.get(r.id) ?? null
-                }));
-            }
+        const { data: videos, error: vErr } = await supabase
+            .from('prompts')
+            .select('id, video_url')
+            .in('id', ids);
+
+        if (!vErr && Array.isArray(videos)) {
+            const videoMap = new Map(videos.map(v => [v.id, v.video_url]));
+            return rows.map(r => ({
+                ...r,
+                video_url: r.video_url ?? videoMap.get(r.id) ?? null
+            }));
         }
     } catch (mergeErr) {
         console.warn('补充视频链接失败:', mergeErr);
